@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Roel Bakker" />
+
+
+<title>Introduction to Infectious Disease Modelling</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to Infectious Disease
+Modelling</h1>
+<h4 class="author">Roel Bakker</h4>
+<h4 class="date">16-April-2024</h4>
+
+
+
+<hr />
+<div id="agenda" class="section level3">
+<h3>Agenda</h3>
+<ul>
+<li>Round of introduction</li>
+<li><a href="#install-r-and-rstudio">Install R and RStudio</a></li>
+<li><a href="#introduction-to-r">Introduction to R</a></li>
+<li><a href="./R/R_lab.R">R Lab</a></li>
+<li>Q &amp; A</li>
+<li>Coffee Break</li>
+<li><a href="#sir-model">SIR Model</a></li>
+<li><a href="#sir-model-in-rstudio">SIR Model in RStudio</a></li>
+<li><a href="#background-on-differential-equations">Background on
+Differential Equations</a></li>
+<li>Q &amp; A</li>
+</ul>
+<hr />
+</div>
+<div id="install-r-and-rstudio" class="section level3">
+<h3>Install R and RStudio</h3>
+<ul>
+<li>download R from r-project.org [<a href="http://cran.at.r-project.org/" class="uri">http://cran.at.r-project.org/</a>]</li>
+<li>download RStudio Desktop from rstudio.org [<a href="http://www.rstudio.com/ide/download/" class="uri">http://www.rstudio.com/ide/download/</a>]</li>
+<li>install both R and RStudio</li>
+<li>test successful installation with:</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">demo</span>(graphics)</span></code></pre></div>
+<hr />
+</div>
+<div id="introduction-to-r" class="section level3">
+<h3>Introduction to R</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">12</span>, <span class="at">mean =</span> <span class="sc">-</span><span class="dv">5</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>x </span></code></pre></div>
+<pre><code>##  [1] -6.170962 -3.929930 -4.005740 -4.236180 -6.257335 -4.987015 -6.346099
+##  [8] -5.321337 -5.698380 -7.829254 -5.747293 -6.851584</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">mean</span>(x)</span></code></pre></div>
+<pre><code>## [1] -5.615092</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">summary</span>(x)</span></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  -7.829  -6.280  -5.723  -5.615  -4.799  -3.930</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Draw a histogram</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">hist</span>(x)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># with more values</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">rnorm</span>(<span class="dv">1000000</span>,<span class="at">mean=</span><span class="dv">4</span>),<span class="at">breaks=</span><span class="dv">100</span>,<span class="at">col=</span><span class="st">&quot;red&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<hr />
+</div>
+<div id="working-on-the-r-command-line" class="section level3">
+<h3>Working on the R command-line</h3>
+<ul>
+<li>^ v arrow keys to navigate your command history</li>
+<li>&lt;- -&gt; arrow keys to edit the command-line</li>
+<li>you can save the command history:</li>
+</ul>
+<pre><code>history()</code></pre>
+<ul>
+<li>TAB for object/file completion</li>
+</ul>
+<pre><code>df = read.csv(&quot;data   &quot;)</code></pre>
+<hr />
+</div>
+<div id="expressions" class="section level3">
+<h3>1.1 Expressions</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="dv">2</span><span class="sc">+</span><span class="dv">3</span></span></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="dv">4</span><span class="sc">*</span><span class="dv">5</span></span></code></pre></div>
+<pre><code>## [1] 20</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="dv">3</span><span class="sc">^</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 1.732051</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="dv">2</span><span class="sc">^</span><span class="dv">8</span></span></code></pre></div>
+<pre><code>## [1] 256</code></pre>
+<p>R <strong>evaluates</strong> these expressions, i.e. determines the
+<strong>value</strong> of these expressions</p>
+<hr />
+</div>
+<div id="expressions-evaluating-to-logical-values" class="section level3">
+<h3>1.2 Expressions evaluating to logical values</h3>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="dv">2</span> <span class="sc">&lt;</span> <span class="dv">3</span>   </span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="dv">1</span> <span class="sc">&gt;</span> <span class="dv">10</span>  </span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="dv">5</span> <span class="sc">==</span> <span class="dv">5</span>   </span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="dv">5</span> <span class="sc">!=</span> <span class="dv">5</span></span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<hr />
+<p>Short for <strong>TRUE</strong> and <strong>FALSE</strong></p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>T</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>F</span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<hr />
+</div>
+<div id="variables" class="section level3">
+<h3>1.3 Variables</h3>
+<p>Every variable has a <strong>name</strong> and a
+<strong>type</strong>.</p>
+<p>R has the following data types: <strong>character</strong>,
+<strong>numeric</strong>, <strong>integer</strong> and
+<strong>logical</strong>.</p>
+<p>The name of a variable may contain</p>
+<ul>
+<li>letters (upper/lower case matters)</li>
+<li>digits</li>
+<li>periods</li>
+<li>underscores and</li>
+<li>should start with a letter</li>
+</ul>
+<hr />
+<p>Variables do not need to be declared first.</p>
+<p>A variable is assigned a value in an ‘assignment’ statement (in
+addition to <strong>=</strong> it is possible to use
+<strong>&lt;-</strong> as assignment operator)</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="dv">200</span></span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>half.x  <span class="ot">=</span>  x<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>half.x</span></code></pre></div>
+<pre><code>## [1] 100</code></pre>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fl">12.3</span></span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>y </span></code></pre></div>
+<pre><code>## [1] 12.3</code></pre>
+<hr />
+</div>
+<div id="character" class="section level3">
+<h3>1.3.1 character</h3>
+<p>The class() function is used to lookup the type of a variable.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>firstName <span class="ot">=</span> <span class="st">&quot;John&quot;</span></span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="fu">class</span>(firstName)</span></code></pre></div>
+<pre><code>## [1] &quot;character&quot;</code></pre>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a>firstName</span></code></pre></div>
+<pre><code>## [1] &quot;John&quot;</code></pre>
+<hr />
+</div>
+<div id="numeric" class="section level3">
+<h3>1.3.2 numeric</h3>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>heightInCm <span class="ot">=</span> <span class="fl">178.2</span></span>
+<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a><span class="fu">class</span>(heightInCm)</span></code></pre></div>
+<pre><code>## [1] &quot;numeric&quot;</code></pre>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>heightInCm</span></code></pre></div>
+<pre><code>## [1] 178.2</code></pre>
+<hr />
+</div>
+<div id="integer" class="section level3">
+<h3>1.3.3 integer</h3>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a>numberOfChildren <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a><span class="fu">class</span>(numberOfChildren)</span></code></pre></div>
+<pre><code>## [1] &quot;numeric&quot;</code></pre>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>numberOfChildren <span class="ot">=</span> 2L <span class="co"># number of children should be integer</span></span>
+<span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a><span class="fu">class</span>(numberOfChildren)</span></code></pre></div>
+<pre><code>## [1] &quot;integer&quot;</code></pre>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a>numberOfChildren</span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<hr />
+</div>
+<div id="logical" class="section level3">
+<h3>1.3.4 logical</h3>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a>RisFun <span class="ot">=</span> T</span>
+<span id="cb50-2"><a href="#cb50-2" tabindex="-1"></a><span class="fu">class</span>(RisFun)</span></code></pre></div>
+<pre><code>## [1] &quot;logical&quot;</code></pre>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a>RisFun</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<hr />
+</div>
+<div id="casting-coercion" class="section level3">
+<h3>1.3.5 Casting (coercion)</h3>
+<p>“as” can be used to cast to a different type:</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">as.integer</span>(<span class="fl">3.9</span>)</span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a><span class="fu">class</span>(y)</span></code></pre></div>
+<pre><code>## [1] &quot;integer&quot;</code></pre>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a>y <span class="co"># the value of y is truncated</span></span></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">as.character</span>(<span class="dv">33</span>)</span>
+<span id="cb58-2"><a href="#cb58-2" tabindex="-1"></a><span class="fu">class</span>(x)</span></code></pre></div>
+<pre><code>## [1] &quot;character&quot;</code></pre>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" tabindex="-1"></a>x</span></code></pre></div>
+<pre><code>## [1] &quot;33&quot;</code></pre>
+<hr />
+</div>
+<div id="functions" class="section level3">
+<h3>1.4 Functions</h3>
+<p>A function can be called with the name of the function followed by
+the arguments of the function:</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" tabindex="-1"></a><span class="fu">max</span>(<span class="dv">9</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">11</span>,<span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 11</code></pre>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" tabindex="-1"></a><span class="fu">sum</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## [1] 9</code></pre>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" tabindex="-1"></a><span class="fu">prod</span>(<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>)</span></code></pre></div>
+<pre><code>## [1] 210</code></pre>
+<hr />
+</div>
+<div id="help" class="section level3">
+<h3>1.5 Help</h3>
+<pre><code>? sum
+?? product</code></pre>
+<hr />
+</div>
+<div id="files" class="section level3">
+<h3>1.6 Files</h3>
+<ul>
+<li>dir() shows the files in the working directory</li>
+<li>ls() shows the variables defined</li>
+</ul>
+<pre><code>dir()
+ls()</code></pre>
+<hr />
+</div>
+<div id="vectors-what-is-a-vector" class="section level3">
+<h3>2.1 Vectors: what is a vector?</h3>
+<p>A vector is an ordered collection of values of the same type</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" tabindex="-1"></a>lengths <span class="ot">=</span> <span class="fu">c</span> (<span class="fl">178.2</span>, <span class="fl">180.2</span>, <span class="fl">177.4</span>) <span class="do">## c for &quot;combine&quot;</span></span>
+<span id="cb70-2"><a href="#cb70-2" tabindex="-1"></a>lengths</span></code></pre></div>
+<pre><code>## [1] 178.2 180.2 177.4</code></pre>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" tabindex="-1"></a>firstNames <span class="ot">=</span> <span class="fu">c</span> (<span class="st">&quot;John&quot;</span>,<span class="st">&quot;Peter&quot;</span>,<span class="st">&quot;James&quot;</span>,<span class="st">&quot;Mary&quot;</span>)</span>
+<span id="cb72-2"><a href="#cb72-2" tabindex="-1"></a>firstNames</span></code></pre></div>
+<pre><code>## [1] &quot;John&quot;  &quot;Peter&quot; &quot;James&quot; &quot;Mary&quot;</code></pre>
+<p>Vector of length 1</p>
+<p>R works with vectors by default.<br />
+A variable with one value is a vector of length 1.</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">30</span>)</span>
+<span id="cb74-2"><a href="#cb74-2" tabindex="-1"></a>x</span></code></pre></div>
+<pre><code>## [1] 10 20 30</code></pre>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" tabindex="-1"></a><span class="fu">length</span>(x) </span></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" tabindex="-1"></a>y <span class="ot">=</span> <span class="dv">33</span></span>
+<span id="cb78-2"><a href="#cb78-2" tabindex="-1"></a><span class="fu">length</span>(y)</span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" tabindex="-1"></a>y[<span class="dv">1</span>]</span></code></pre></div>
+<pre><code>## [1] 33</code></pre>
+<hr />
+</div>
+<div id="sequence-vectors" class="section level3">
+<h3>2.2 Sequence vectors</h3>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" tabindex="-1"></a>z <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb82-2"><a href="#cb82-2" tabindex="-1"></a>z</span></code></pre></div>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" tabindex="-1"></a>z <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">5</span>)</span>
+<span id="cb84-2"><a href="#cb84-2" tabindex="-1"></a>z <span class="ot">=</span> <span class="fu">seq</span>(<span class="at">from=</span><span class="dv">1</span>,<span class="at">to=</span><span class="dv">5</span>,<span class="at">by=</span><span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb84-3"><a href="#cb84-3" tabindex="-1"></a>z</span></code></pre></div>
+<pre><code>##  [1] 1.000000 1.333333 1.666667 2.000000 2.333333 2.666667 3.000000 3.333333
+##  [9] 3.666667 4.000000 4.333333 4.666667 5.000000</code></pre>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" tabindex="-1"></a><span class="dv">9</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
+<pre><code>## [1] 9 8 7 6 5</code></pre>
+<hr />
+</div>
+<div id="vectors-selecting-elements" class="section level3">
+<h3>2.3 Vectors: selecting elements</h3>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="dv">100</span><span class="sc">:</span><span class="dv">120</span></span>
+<span id="cb88-2"><a href="#cb88-2" tabindex="-1"></a>x[<span class="dv">1</span>]           <span class="do">## the first element is element nr 1 (not 0 as in C or Python!!) </span></span></code></pre></div>
+<pre><code>## [1] 100</code></pre>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" tabindex="-1"></a>x[<span class="fu">c</span>(<span class="dv">12</span>,<span class="dv">14</span>)]    <span class="do">## elements 12 and 14</span></span></code></pre></div>
+<pre><code>## [1] 111 113</code></pre>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" tabindex="-1"></a>x[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]         <span class="do">## elements 1 thru 5</span></span></code></pre></div>
+<pre><code>## [1] 100 101 102 103 104</code></pre>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" tabindex="-1"></a>x[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>)] <span class="do">## excludes elements 1, 3, 5 and 7 </span></span></code></pre></div>
+<pre><code>##  [1] 101 103 105 107 108 109 110 111 112 113 114 115 116 117 118 119 120</code></pre>
+<hr />
+</div>
+<div id="vectors-assigning-values-to-elements" class="section level3">
+<h3>2.4 Vectors: assigning values to elements</h3>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="dv">10</span>)</span>
+<span id="cb96-2"><a href="#cb96-2" tabindex="-1"></a>x [<span class="dv">1</span><span class="sc">:</span> <span class="dv">3</span>] <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb96-3"><a href="#cb96-3" tabindex="-1"></a>x [<span class="dv">5</span><span class="sc">:</span> <span class="dv">6</span>] <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">5</span>,<span class="cn">NA</span>)</span>
+<span id="cb96-4"><a href="#cb96-4" tabindex="-1"></a>x [<span class="dv">7</span><span class="sc">:</span><span class="dv">10</span>] <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">9</span>)</span>
+<span id="cb96-5"><a href="#cb96-5" tabindex="-1"></a>x</span></code></pre></div>
+<pre><code>##  [1]  2  2  2  0  5 NA  1  9  1  9</code></pre>
+<hr />
+</div>
+<div id="vectors-indexing-elements-by-name" class="section level3">
+<h3>2.5 Vectors: indexing elements by name</h3>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" tabindex="-1"></a>cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1200</span>,<span class="dv">1800</span>,<span class="dv">3500</span>)</span>
+<span id="cb98-2"><a href="#cb98-2" tabindex="-1"></a><span class="fu">names</span>(cc)<span class="ot">=</span><span class="fu">c</span>(<span class="st">&quot;VW Polo&quot;</span>,<span class="st">&quot;MG B&quot;</span>,<span class="st">&quot;Rover V8&quot;</span>)</span>
+<span id="cb98-3"><a href="#cb98-3" tabindex="-1"></a>cc[<span class="st">&quot;MG B&quot;</span>]</span></code></pre></div>
+<pre><code>## MG B 
+## 1800</code></pre>
+<hr />
+</div>
+<div id="vectors-plotting-element-values" class="section level3">
+<h3>2.6 Vectors: plotting element values</h3>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" tabindex="-1"></a>cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1200</span>,<span class="dv">1800</span>,<span class="dv">3500</span>)</span>
+<span id="cb100-2"><a href="#cb100-2" tabindex="-1"></a><span class="fu">names</span>(cc)<span class="ot">=</span><span class="fu">c</span>(<span class="st">&quot;VW Polo&quot;</span>,<span class="st">&quot;MG B&quot;</span>,<span class="st">&quot;Rover V8&quot;</span>)</span>
+<span id="cb100-3"><a href="#cb100-3" tabindex="-1"></a><span class="fu">barplot</span>(cc)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<hr />
+</div>
+<div id="computation-with-vectors" class="section level3">
+<h3>2.7 Computation with vectors</h3>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" tabindex="-1"></a>a <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>) ; a <span class="ot">=</span> a <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb101-2"><a href="#cb101-2" tabindex="-1"></a>a</span></code></pre></div>
+<pre><code>## [1] 2 3 4</code></pre>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" tabindex="-1"></a>a <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span> ; b <span class="ot">=</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">2</span> ; c <span class="ot">=</span> a <span class="sc">+</span> b</span>
+<span id="cb103-2"><a href="#cb103-2" tabindex="-1"></a>c</span></code></pre></div>
+<pre><code>## [1] 5 5 5</code></pre>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" tabindex="-1"></a>c<span class="sc">/</span><span class="dv">5</span></span></code></pre></div>
+<pre><code>## [1] 1 1 1</code></pre>
+<hr />
+</div>
+<div id="comparing-vectors" class="section level3">
+<h3>2.8 Comparing vectors</h3>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" tabindex="-1"></a>a <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>)</span>
+<span id="cb107-2"><a href="#cb107-2" tabindex="-1"></a>b <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">5</span>)</span>
+<span id="cb107-3"><a href="#cb107-3" tabindex="-1"></a>a <span class="sc">==</span> b</span></code></pre></div>
+<pre><code>## [1] FALSE  TRUE FALSE</code></pre>
+<p>The result is a vector of T/F values i.e. a logical vector ***** ###
+2.9 Logical vectors</p>
+<p>If a vector is compared to a single value all elements of that vector
+are compared; the result is a logical vector:</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span></span>
+<span id="cb109-2"><a href="#cb109-2" tabindex="-1"></a>x<span class="sc">&gt;</span><span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1] FALSE FALSE  TRUE  TRUE  TRUE</code></pre>
+<hr />
+<p>A logical vector can be used to select elements of the original
+vector:</p>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span></span>
+<span id="cb111-2"><a href="#cb111-2" tabindex="-1"></a>select <span class="ot">=</span> x<span class="sc">&gt;</span><span class="dv">2</span></span>
+<span id="cb111-3"><a href="#cb111-3" tabindex="-1"></a>x[select]</span></code></pre></div>
+<pre><code>## [1] 3 4 5</code></pre>
+<p>in SQL: SELECT * FROM NUMBERS WHERE x&gt;2; ***** ### 2.9 Logical
+vectors: more examples</p>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb113-2"><a href="#cb113-2" tabindex="-1"></a>gt5 <span class="ot">=</span> (x <span class="sc">&gt;</span> <span class="dv">5</span>)</span>
+<span id="cb113-3"><a href="#cb113-3" tabindex="-1"></a>lt8 <span class="ot">=</span> (x <span class="sc">&lt;</span> <span class="dv">8</span>)</span>
+<span id="cb113-4"><a href="#cb113-4" tabindex="-1"></a>x[gt5 <span class="sc">&amp;</span> lt8]</span></code></pre></div>
+<pre><code>## [1] 6 7</code></pre>
+<p>Use &amp; (not &amp;&amp;) as ‘short-circuit’ boolean operators may
+have unexpected effects in R !! *****</p>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" tabindex="-1"></a>lt5 <span class="ot">=</span> (x <span class="sc">&lt;</span> <span class="dv">5</span>)</span>
+<span id="cb115-2"><a href="#cb115-2" tabindex="-1"></a>gt8 <span class="ot">=</span> (x <span class="sc">&gt;</span> <span class="dv">8</span>)</span>
+<span id="cb115-3"><a href="#cb115-3" tabindex="-1"></a>x[lt5 <span class="sc">|</span> gt8]</span></code></pre></div>
+<pre><code>## [1]  1  2  3  4  9 10</code></pre>
+<p>Use | (not ||)</p>
+</div>
+<div id="applying-functions-to-vectors" class="section level3">
+<h3>2.10 Applying functions to vectors</h3>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" tabindex="-1"></a>z <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">9</span>,<span class="dv">49</span>,<span class="dv">16</span>,<span class="dv">36</span>)</span>
+<span id="cb117-2"><a href="#cb117-2" tabindex="-1"></a><span class="fu">min</span>(z)</span></code></pre></div>
+<pre><code>## [1] 9</code></pre>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" tabindex="-1"></a><span class="fu">range</span>(z)</span></code></pre></div>
+<pre><code>## [1]  9 49</code></pre>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" tabindex="-1"></a><span class="fu">sqrt</span>(z)</span></code></pre></div>
+<pre><code>## [1] 3 7 4 6</code></pre>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1" tabindex="-1"></a><span class="fu">sum</span>(z)</span></code></pre></div>
+<pre><code>## [1] 110</code></pre>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" tabindex="-1"></a><span class="fu">summary</span>(z)</span></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    9.00   14.25   26.00   27.50   39.25   49.00</code></pre>
+<hr />
+</div>
+<div id="often-used-functions-with-vectors" class="section level3">
+<h3>2.11 Often used functions with vectors</h3>
+<pre><code>length()
+rev()
+sum(), cumsum(), prod(), cumprod()
+mean(), sd(), var(), median()
+min(), max(), range(), summary()
+exp(), log(), sin(), cos(), tan()
+round(), ceil(), 
+floor(), signif()
+sort(), order(), rank()
+which(), which.max()
+any(), all()</code></pre>
+<hr />
+</div>
+<div id="scatter-plots" class="section level3">
+<h3>2.12 Scatter plots</h3>
+<div class="sourceCode" id="cb128"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="sc">-</span><span class="dv">5</span><span class="sc">:</span><span class="dv">5</span></span>
+<span id="cb128-2"><a href="#cb128-2" tabindex="-1"></a>y <span class="ot">=</span> x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb128-3"><a href="#cb128-3" tabindex="-1"></a><span class="fu">plot</span>(x,y)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAATlBMVEUAAAAAADoAAGYAOpAAZrY6AAA6ADo6kNtmAABmADpmZmZmtv+QOgCQZgCQ2/+2ZgC2/7a2///bkDrb/9vb////tmb/25D//7b//9v///98iHqEAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAFR0lEQVR4nO3di3KbRgBAURI7rdqoVkuDJf3/jxb0cBqb3YuBfWDfO9MZd2J25TMIkLSSmrNFa0rfgNoTCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCFoZqNlMpYBuSuuOuma3G1cS6P5flb37Bq4P1KQYd61eblxmoP/ftQWC4QSi4TwG0XCexbINly6BIIEggSCBIIEggSCBIIGgRECn/fUh6dd/VhmuYGmA2ub36w/d/YdFw5UsCdBp/8LSPvxYPFzRkgAdd9/vP3aBO9nnBnIPotrmtgt5DAp03F3PYoH9R6Dcw6Wr4JP22ygRUNsTXA5DrWexsdovT/1h6PEs0HjX0/xp3x+iBRrrfqF4ePgh0FgvF4qHR4FGu7P0l0MCjXa/lD7tBUo8b+kEggSCBIIEgqoCKvoYNjB5TUBFF1SFJq8IqOiSvODkAsHkAsHkFQF5DMLhPIslGy5dPmkPuQdBAkECQQJBAkECQe8HOu6ax4zzlm7OHjS88B5Y9rP+vKWbeRdbbPTRga5EwUW+K85bunlA3WV1y2V1Qup5SzcDaFhed5UJLWH93AvJj7svT/TLLiSP5zJgyIXkkHsQ5UJyyoXk2eYtnc9JQ1XvQWkdp41eM1DaFxInjp7oOujnXWn+dVDal6Knjp5mDwoubn3PcB8ZqBeCZx0/O1B/hfg9+u+f+xi01nCexTaQQJBAkECQQJBAkECQQJBAkECQQJBAkECQT9pDW9qDFrLO23xDQAufP5u5+XaAFj4DO3dzgSZtt+YvphpOoCmbeAyKbuNZrMIEggSCBIIEgrYMBKeldR4RbxgILmxWWvqwXSC4NF544f1qnDV/Mddw2wbK8G6ftwK/HHTqBsrybp/XB5lX/1/zMSjTezV+PU292WUqPouF3+2T8Dnpte5To8Ou+YvnQu/22RJQmXf7rHTQGRl13V+8VOTdPkleTNrudVCmigFtpkJAsyah27Bs84V/oUDLJl8ngZZNIpBAyyYRSKBlkwgk0AdOIEggSCBIIEggSCBIIEggSCBIIEggSCAoF9Ah/AnDlzU1wU+x7pom8iGz8W1p5illAurCL8ae9j1AG/q8+K7/xy4oFN+WZp5UHqDjLnwzn78NL/gHvhv5ul7iEBKIboszTyoPUPvwF9zMwF7CAuFtJ84MZQF6/u2JjgSHcYN+y3PsE8Bj206cGcoBNNxP4GaG1tNcd47YLhJZizNpZioH0LDaKn4zu9gxGoCC206aGcsAdLmbRG9meB/gu1hk/5kwM5cW6PI9He1twcnbDxi8fY1HG/4b8SAd2fY6/vjM06vgQrGN/AFwmo9uyzNPqTzQ87fYlXD8QjG+Lc08qfJAt/tBCKGNPdSAbWHmSflgFRIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEgiqHWhYXHbc8SqgZNUONCwxC33kXpZqBzp3X//+I7Y+KnXVA50P0bdiJK9+IPr+7cRVD3Ta/0lfcp+06oHah3/3BU9i1QMNH7AL72VJW+1AwyLe077gYbp2oOIJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkE/QcGCzAKyqxX4gAAAABJRU5ErkJggg==" /><!-- --></p>
+<hr />
+</div>
+<div id="na-not-available" class="section level3">
+<h3>2.13 NA (Not Available)</h3>
+<p>NA indicates that a value is not available (cf NULL in SQL)</p>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">c</span>(<span class="dv">25</span>,<span class="cn">NA</span>,<span class="dv">20</span>))</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAP1BMVEUAAAAAADoAAGYAOpAAZrY6AAA6kNtmAABmtv+QOgCQ2/+2ZgC2//++vr7bkDrb////tmb/25D//7b//9v////2FEb7AAAACXBIWXMAAA7DAAAOwwHHb6hkAAADrUlEQVR4nO3dYVMSawCGYUrLzEJT//9vbQVxGly42RGSYa/7Q9P58rx4zR4gaW3xrL0tPvsBnHuAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQNAXo8eb78OvDYrH4+utUj+fsmgy0vLp/+d2Pkz2iM2sq0CvNimkWTQX6820F9DCb/8lcQdE0oOH5eXH9vHm6nkUTX+YHoy8/hxey2fh4H1QdB2jx1tZ/HtRRHsKpmvbolsOXs36S3vEq9gr0e0oXBLQcnn8eb16epQGN9XT7ffXr8BIPaKzNHzDuru4BjbW+goburgGNtmEZ3g0BGm25fg0briVAH5kDFHOAYg5QzAGKOUAxByjmAMUcoJgDFHOAYg5QzAGKOUAxB+jdytanGv8X6KQfolzCFXTS4wAd9BUdLUAHzQGKOUAxByjmAMUcoJgDFHOAYg5QzAGKubkCHXCvBqC4VwNQ/E17QHGvBiBX0J4OuFdj3kDPfa/G7IEOmwP0buVzP9U4f6CtOUAxN1eg9avYOu+Dxtr598e35mYLNAhdHzI3X6DhHdD+nygwe6DD5gDFHKCYAxRzgGIOUMwBijlAMQco5gDFHKCYAxRzgGIOUMwBijlA71Z8qjFpDlDMAYo5QDEHKOYAxRygmAMUc4BiDlDMAYo5QDEHKOYAxRygmAMUc4BiDlDMzRXIDXWRG+oit0NFu2+o86nGKldQ5Ia6zg11H32sp3/EI4cCikMBxaGA4lBAcSigOBRQHAooDgUUhwKKQwHFoYDiUEBxKKA4FFAcej5AT7d7f3LH7IGWm2+U7fyO2byB3v6dVd+THu+fT8PiU41T/kMXI1/DKY878hV0eU18Dnq9hHZ/1/7imnbBbX4G1Wyun6O/D7q8AEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFP0FIOkXfI29TxwAAAAASUVORK5CYII=" /><!-- --></p>
+<hr />
+<p>‘Missing values’ are denoted with NA NA cannot be compared with other
+values</p>
+<div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">25</span>,<span class="cn">NA</span>,<span class="dv">20</span>) <span class="sc">==</span> <span class="fu">c</span>(<span class="dv">25</span>,<span class="dv">25</span>,<span class="dv">25</span>)</span></code></pre></div>
+<pre><code>## [1]  TRUE    NA FALSE</code></pre>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1" tabindex="-1"></a><span class="co"># NA == NA # neither with itself...</span></span>
+<span id="cb132-2"><a href="#cb132-2" tabindex="-1"></a><span class="fu">is.na</span>(<span class="cn">NA</span>) <span class="co"># the function is.na() is used to test if a value equals NA</span></span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<hr />
+</div>
+<div id="matrices" class="section level3">
+<h3>3.1 Matrices</h3>
+<p>Matrices have 2 dimensions</p>
+<div class="sourceCode" id="cb134"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1" tabindex="-1"></a>m1 <span class="ot">=</span> <span class="fu">matrix</span>(<span class="dv">9</span>,<span class="at">nrow=</span><span class="dv">3</span>,<span class="at">ncol=</span><span class="dv">3</span>)</span>
+<span id="cb134-2"><a href="#cb134-2" tabindex="-1"></a>m2 <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">11</span><span class="sc">:</span><span class="dv">14</span>,<span class="dv">21</span><span class="sc">:</span><span class="dv">24</span>),<span class="at">nrow=</span><span class="dv">2</span>,<span class="at">ncol=</span><span class="dv">4</span>,<span class="at">byrow=</span>T)</span>
+<span id="cb134-3"><a href="#cb134-3" tabindex="-1"></a>m2</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]   11   12   13   14
+## [2,]   21   22   23   24</code></pre>
+<hr />
+</div>
+<div id="selecting-elements-of-a-matrix" class="section level3">
+<h3>3.2 Selecting elements of a matrix</h3>
+<div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1" tabindex="-1"></a><span class="co"># a single element</span></span>
+<span id="cb136-2"><a href="#cb136-2" tabindex="-1"></a>m2[<span class="dv">1</span>,<span class="dv">3</span>]</span></code></pre></div>
+<pre><code>## [1] 13</code></pre>
+<div class="sourceCode" id="cb138"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1" tabindex="-1"></a><span class="co"># selecting a column </span></span>
+<span id="cb138-2"><a href="#cb138-2" tabindex="-1"></a>m2[,<span class="dv">1</span>]</span></code></pre></div>
+<pre><code>## [1] 11 21</code></pre>
+<div class="sourceCode" id="cb140"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1" tabindex="-1"></a><span class="co"># selecting a row</span></span>
+<span id="cb140-2"><a href="#cb140-2" tabindex="-1"></a>m2[<span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>## [1] 21 22 23 24</code></pre>
+<hr />
+</div>
+<div id="plotting-matrix-values" class="section level3">
+<h3>3.3 Plotting matrix values</h3>
+<div class="sourceCode" id="cb142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1" tabindex="-1"></a>height<span class="ot">=</span><span class="fu">matrix</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">10</span>)</span>
+<span id="cb142-2"><a href="#cb142-2" tabindex="-1"></a>height[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>]<span class="ot">=</span><span class="dv">5</span></span>
+<span id="cb142-3"><a href="#cb142-3" tabindex="-1"></a>height</span></code></pre></div>
+<pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+##  [1,]    1    1    1    1    1    1    1    1    1     1
+##  [2,]    1    1    1    1    1    1    1    1    1     1
+##  [3,]    1    1    1    1    1    1    1    1    1     1
+##  [4,]    1    1    1    5    5    5    1    1    1     1
+##  [5,]    1    1    1    5    5    5    1    1    1     1
+##  [6,]    1    1    1    5    5    5    1    1    1     1
+##  [7,]    1    1    1    1    1    1    1    1    1     1
+##  [8,]    1    1    1    1    1    1    1    1    1     1
+##  [9,]    1    1    1    1    1    1    1    1    1     1
+## [10,]    1    1    1    1    1    1    1    1    1     1</code></pre>
+<hr />
+<div class="sourceCode" id="cb144"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1" tabindex="-1"></a>height<span class="ot">=</span><span class="fu">matrix</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">10</span>)</span>
+<span id="cb144-2"><a href="#cb144-2" tabindex="-1"></a>height[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>]<span class="ot">=</span><span class="dv">5</span></span>
+<span id="cb144-3"><a href="#cb144-3" tabindex="-1"></a><span class="fu">contour</span>(height)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<hr />
+<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" tabindex="-1"></a>height<span class="ot">=</span><span class="fu">matrix</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">10</span>)</span>
+<span id="cb145-2"><a href="#cb145-2" tabindex="-1"></a>height[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>]<span class="ot">=</span><span class="dv">5</span></span>
+<span id="cb145-3"><a href="#cb145-3" tabindex="-1"></a><span class="fu">persp</span>(height,<span class="at">expand=</span><span class="fl">0.2</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<hr />
+</div>
+<div id="calling-r-functions" class="section level3">
+<h3>4.1 Calling R functions</h3>
+<pre><code>? read.csv 
+read.csv(file, header = TRUE, sep = &quot;,&quot;, quote=&quot;\&quot;&quot;, dec=&quot;.&quot;, fill = TRUE, comment.char=&quot;&quot;, ...)   
+# valid ways to call a function:
+read.csv(&quot;data.csv&quot;,F)            # correct
+read.csv(file=&quot;data.csv&quot;,header=F)# clear
+read.csv(&quot;data.csv&quot;,F,&quot;;&quot;)        # correct
+read.csv(file=&quot;data.csv&quot;,header=F,sep=&quot;;&quot;) # clear
+read.csv(&quot;data.csv&quot;,&quot;;&quot;)          # error!
+read.csv(&quot;data.csv&quot;,sep=&quot;;&quot;)      # correct</code></pre>
+<hr />
+</div>
+<div id="writing-r-functions" class="section level3">
+<h3>4.2 Writing R functions</h3>
+<div class="sourceCode" id="cb147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1" tabindex="-1"></a>mult <span class="ot">=</span> <span class="cf">function</span>(a,b){</span>
+<span id="cb147-2"><a href="#cb147-2" tabindex="-1"></a>  a<span class="sc">*</span>b <span class="co"># the same as return(a*b)</span></span>
+<span id="cb147-3"><a href="#cb147-3" tabindex="-1"></a>}</span>
+<span id="cb147-4"><a href="#cb147-4" tabindex="-1"></a><span class="fu">mult</span>(<span class="dv">5</span>,<span class="dv">6</span>)</span></code></pre></div>
+<pre><code>## [1] 30</code></pre>
+<hr />
+</div>
+<div id="scope-in-functions" class="section level3">
+<h3>4.3 Scope in functions</h3>
+<div class="sourceCode" id="cb149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1" tabindex="-1"></a>a <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb149-2"><a href="#cb149-2" tabindex="-1"></a>f <span class="ot">=</span> <span class="cf">function</span>(x){</span>
+<span id="cb149-3"><a href="#cb149-3" tabindex="-1"></a>  a <span class="ot">=</span> <span class="dv">2</span><span class="sc">*</span>a</span>
+<span id="cb149-4"><a href="#cb149-4" tabindex="-1"></a>  x<span class="sc">+</span>a</span>
+<span id="cb149-5"><a href="#cb149-5" tabindex="-1"></a>}</span>
+<span id="cb149-6"><a href="#cb149-6" tabindex="-1"></a><span class="fu">f</span>(<span class="dv">3</span>)</span></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1" tabindex="-1"></a>a</span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<hr />
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" tabindex="-1"></a>g <span class="ot">=</span> <span class="cf">function</span>(x){</span>
+<span id="cb153-2"><a href="#cb153-2" tabindex="-1"></a>  x <span class="ot">=</span> x<span class="sc">+</span><span class="dv">3</span></span>
+<span id="cb153-3"><a href="#cb153-3" tabindex="-1"></a>  x</span>
+<span id="cb153-4"><a href="#cb153-4" tabindex="-1"></a>}</span>
+<span id="cb153-5"><a href="#cb153-5" tabindex="-1"></a>a<span class="ot">=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb153-6"><a href="#cb153-6" tabindex="-1"></a><span class="fu">g</span>(a)</span></code></pre></div>
+<pre><code>## [1] 4 5 6</code></pre>
+<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1" tabindex="-1"></a>a</span></code></pre></div>
+<pre><code>## [1] 1 2 3</code></pre>
+<hr />
+</div>
+<div id="scope-in-functions-1" class="section level3">
+<h3>4.3 Scope in functions</h3>
+<ul>
+<li><p>Functions in R don’t have unexpected ‘side-effects’.</p></li>
+<li><p>When you write a function: pretend to be living in the body of
+the function, where only data is available that is passed through the
+function arguments and where you can only pass a value to the outside
+world through the return value…</p></li>
+<li><p>This means that any result of a function should be passed as a
+return value…</p></li>
+<li><p>This is not a problem as a combination of values can be passed as
+a list e.g. list(a,b,x)</p></li>
+</ul>
+<hr />
+</div>
+<div id="data-frames" class="section level3">
+<h3>5.1 Data frames</h3>
+<p>Multiple (column) vectors possibly of different types, all of the
+same lengths</p>
+<div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1" tabindex="-1"></a>vector1 <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">178.2</span>, <span class="fl">180.2</span>, <span class="fl">177.4</span>, <span class="fl">166.2</span>)</span>
+<span id="cb157-2"><a href="#cb157-2" tabindex="-1"></a>vector2 <span class="ot">=</span>  <span class="fu">c</span>(<span class="st">&quot;John&quot;</span>,<span class="st">&quot;Richard&quot;</span>,<span class="st">&quot;Peter&quot;</span>,<span class="st">&quot;Sophie&quot;</span>)</span>
+<span id="cb157-3"><a href="#cb157-3" tabindex="-1"></a>myDataFrame <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">heights=</span>vector1,<span class="at">firstNames=</span>vector2)</span>
+<span id="cb157-4"><a href="#cb157-4" tabindex="-1"></a>myDataFrame</span></code></pre></div>
+<pre><code>##   heights firstNames
+## 1   178.2       John
+## 2   180.2    Richard
+## 3   177.4      Peter
+## 4   166.2     Sophie</code></pre>
+<hr />
+</div>
+<div id="data-frames---subsetting" class="section level3">
+<h3>5.2 Data frames - subsetting</h3>
+<div class="sourceCode" id="cb159"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1" tabindex="-1"></a>myDataFrame[<span class="dv">1</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span></code></pre></div>
+<pre><code>##   heights firstNames
+## 1   178.2       John</code></pre>
+<div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1" tabindex="-1"></a>myDataFrame<span class="sc">$</span>firstNames</span></code></pre></div>
+<pre><code>## [1] &quot;John&quot;    &quot;Richard&quot; &quot;Peter&quot;   &quot;Sophie&quot;</code></pre>
+<hr />
+<div id="data-frames---logical-subsetting" class="section level4">
+<h4>5.3 Data frames - logical subsetting</h4>
+<div class="sourceCode" id="cb163"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1" tabindex="-1"></a>myDataFrame[myDataFrame<span class="sc">$</span>firstNames<span class="sc">==</span><span class="st">&quot;John&quot;</span>,]</span></code></pre></div>
+<pre><code>##   heights firstNames
+## 1   178.2       John</code></pre>
+<div class="sourceCode" id="cb165"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1" tabindex="-1"></a>myDataFrame[myDataFrame<span class="sc">$</span>heights <span class="sc">&lt;</span> <span class="dv">170</span>,]</span></code></pre></div>
+<pre><code>##   heights firstNames
+## 4   166.2     Sophie</code></pre>
+<hr />
+</div>
+</div>
+<div id="lists" class="section level3">
+<h3>6.1 Lists</h3>
+<p>A vector with values of different types</p>
+<div class="sourceCode" id="cb167"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1" tabindex="-1"></a>p <span class="ot">=</span> <span class="fu">list</span>(<span class="at">temp=</span><span class="sc">-</span><span class="dv">5</span>,<span class="at">precipitation=</span><span class="st">&quot;snow&quot;</span>,<span class="at">sunny=</span>T)</span>
+<span id="cb167-2"><a href="#cb167-2" tabindex="-1"></a>p</span></code></pre></div>
+<pre><code>## $temp
+## [1] -5
+## 
+## $precipitation
+## [1] &quot;snow&quot;
+## 
+## $sunny
+## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb169"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb169-1"><a href="#cb169-1" tabindex="-1"></a>p[[<span class="dv">1</span>]]</span></code></pre></div>
+<pre><code>## [1] -5</code></pre>
+<div class="sourceCode" id="cb171"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb171-1"><a href="#cb171-1" tabindex="-1"></a>p[[<span class="st">&quot;precipitation&quot;</span>]]</span></code></pre></div>
+<pre><code>## [1] &quot;snow&quot;</code></pre>
+<div class="sourceCode" id="cb173"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb173-1"><a href="#cb173-1" tabindex="-1"></a>p<span class="sc">$</span>precipitation</span></code></pre></div>
+<pre><code>## [1] &quot;snow&quot;</code></pre>
+<ul>
+<li>Use TAB completion!</li>
+<li>Use lists primarily for returning multiple types of values from a
+function</li>
+<li>Lists are not always easy to use</li>
+</ul>
+<hr />
+</div>
+<div id="factors" class="section level3">
+<h3>7. Factors</h3>
+<p>Qualitative variables used in models</p>
+<div class="sourceCode" id="cb175"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb175-1"><a href="#cb175-1" tabindex="-1"></a>smoker <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;yes&quot;</span>,<span class="st">&quot;no&quot;</span>,<span class="st">&quot;yes&quot;</span>,<span class="st">&quot;yes&quot;</span>)</span>
+<span id="cb175-2"><a href="#cb175-2" tabindex="-1"></a>smokerFactor <span class="ot">=</span> <span class="fu">as.factor</span>(smoker)</span>
+<span id="cb175-3"><a href="#cb175-3" tabindex="-1"></a>smokerFactor</span></code></pre></div>
+<pre><code>## [1] yes no  yes yes
+## Levels: no yes</code></pre>
+<p>A factor contains data indexed by its ‘levels’ i.e. an enumeration of
+the values</p>
+<div class="sourceCode" id="cb177"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb177-1"><a href="#cb177-1" tabindex="-1"></a>delay <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">7</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">9</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">6</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">32</span>,<span class="dv">2</span>)</span>
+<span id="cb177-2"><a href="#cb177-2" tabindex="-1"></a><span class="fu">factor</span>(delay)</span></code></pre></div>
+<pre><code>##  [1] 1  2  2  7  3  2  3  9  1  1  2  3  6  6  5  4  32 2 
+## Levels: 1 2 3 4 5 6 7 9 32</code></pre>
+<div class="sourceCode" id="cb179"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb179-1"><a href="#cb179-1" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">factor</span>(delay))</span></code></pre></div>
+<pre><code>## 
+##  1  2  3  4  5  6  7  9 32 
+##  3  5  3  1  1  2  1  1  1</code></pre>
+<hr />
+<div class="sourceCode" id="cb181"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb181-1"><a href="#cb181-1" tabindex="-1"></a>delay <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">7</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">9</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">6</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">32</span>,<span class="dv">2</span>)</span>
+<span id="cb181-2"><a href="#cb181-2" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">table</span>(<span class="fu">factor</span>(delay)))</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAUVBMVEUAAAAAADoAAGYAOjoAOpAAZrY6AAA6ADo6AGY6Ojo6OpA6kNtmAABmtv+QOgCQ2/+2ZgC2//++vr7bkDrb2//b////tmb/25D//7b//9v///+9+/h9AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAFAklEQVR4nO3daXeaQBhAYdKadIk1tFRc/v8PrYBkk5nLGCnGufdDTk8OeTFPkSQsWuwtWjH3A7j2BIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIJSgLbLx8PHuiiKL7+nejxXVzJQtVg3//o12SO6slKBjjQtUxalAm0eWqD67ZOseC60mned+3D/fxfegoJAf950s0DNf/79vt9dJ4zLA2jfGt09HX6QBXwEOnecQDBOIBgnEIwTCMYJBOMEgnECwTiBYJxAME4gGCcQjBMIxgkE4wSCcXkBHQ+7pozLA6g7otgVOPGTN1B/JNEtKNh22RysPwXisxqZAO335d2TW1C0qngUKNrm4atA0XarQqBLjxMIxgkE4wSCcQLBOIFgnEAwTiAYJxCMEwjGCQTjBIJxAsE4gWBcVkB10VzpmjYuF6CyKB43P9fhezUyByoX6/agtFfaD9duN5tvDVD8Xo3TOzNOgT7L3RtpQM1psd3fPW1BAxwjPnOdJT2wqt9u4F6NbIH2Vffjqw4etc8daOQ4gWCcQDBOIBgnEIwTCMYJBOMEgnECwTiBYJxAME4gGCcQjBMIxgkE4/IFqoqiOxRURW9FyBaoOV62XTYv/yLQULtVe0x6tVgLNFh/NqxcrKv4WY2pgGY4FZK+BR0q72fagmbY7M46q7Fdxu8Xyxbo8FOse5LtVgJ9ZJxAME4gGCcQjBMIxgkE4wSCcQLBOIFgnEAwTiAYJxCMEwjGCQTjBIJxAsE4gWBcrkCjX6IrV6DIkdZLnNU4vcHjnFs+Br7oQ6dC0hbfre7HjDsT6ONfdPjMpc/AJS4evglBoIRxAgkkkEACCSSQQAIJJJBAAgkkkEAC3QjQbhU9Ip09UNW/AW3wnWjzBnq+0n6a1w/6/ECvXrks+RWo0j9z5pgxXzQV0Igt6PZK3AcdN6Hwu2HfXGkbXH9uNZvt5+K/B91eAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQVMCbb6HTuEfqyLvM3WsO48Su8eoPp4PDN9l06+mvbIg9XzVhEDbZfAah67mJdFqEOreSmjEusKG/Wp2q8OHKoo90HRAdeQikLb2/W/oDrQakI+FXpXv9Wo2D7/iSw42GVBdPI755gioGvUfvnmAZ87LamiTfd+U+6AxQBU83vLHmP1GSWt6WQ0u+q55gWr65rfL5ix3CULBN6s6XU3yVQVzb0HtK8N+dBA/bfrV1Kn76NmBRu0Tut1ruJKRu9WccVXK7ED0zbfLxH/W0zPseTXVGVftzAjU0cQXGrMMGL+MqOCW7cHm3IKaZ8arq9aGl2n2GbCThmdpvxr8XWCwWZ9iZfQvhNHL0O9+xxFV9yfJFf0edBMJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkECQQJBAkE/QMZa6NwC8cAXgAAAABJRU5ErkJggg==" /><!-- --></p>
+<hr />
+</div>
+<div id="summary-statistics" class="section level3">
+<h3>8. Summary Statistics</h3>
+</div>
+<div id="mean" class="section level3">
+<h3>8.1 Mean</h3>
+<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="#cb182-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">178.2</span>, <span class="fl">180.2</span>, <span class="fl">177.4</span>)</span>
+<span id="cb182-2"><a href="#cb182-2" tabindex="-1"></a><span class="fu">mean</span>(x)</span></code></pre></div>
+<pre><code>## [1] 178.6</code></pre>
+<p>Mean is defined as: <span class="math inline">\(\bar{x} = \frac{1}{n}
+\sum_{i=1}^{n} x_{i}\)</span></p>
+<hr />
+</div>
+<div id="median" class="section level3">
+<h3>8.2 Median</h3>
+<div class="sourceCode" id="cb184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb184-1"><a href="#cb184-1" tabindex="-1"></a>a <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>)</span>
+<span id="cb184-2"><a href="#cb184-2" tabindex="-1"></a><span class="fu">mean</span>(a); <span class="fu">median</span>(a)</span></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<pre><code>## [1] 3</code></pre>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="#cb187-1" tabindex="-1"></a>a[<span class="dv">5</span>]<span class="ot">=</span><span class="dv">20</span></span>
+<span id="cb187-2"><a href="#cb187-2" tabindex="-1"></a><span class="fu">mean</span>(a); <span class="fu">median</span>(a)</span></code></pre></div>
+<pre><code>## [1] 6</code></pre>
+<pre><code>## [1] 3</code></pre>
+<hr />
+</div>
+<div id="standard-deviation" class="section level3">
+<h3>8.3 Standard Deviation</h3>
+<p>Standard deviation is defined as</p>
+<p><span class="math display">\[ \sigma = \sqrt{\frac{ \sum (x_{i} -
+\bar{x})^2}{n}} \]</span></p>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="#cb190-1" tabindex="-1"></a>a <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>)</span>
+<span id="cb190-2"><a href="#cb190-2" tabindex="-1"></a><span class="fu">sd</span>(a)</span></code></pre></div>
+<pre><code>## [1] 1.581139</code></pre>
+<hr />
+</div>
+<div id="variance" class="section level3">
+<h3>8.4 Variance</h3>
+<p>Variance is defined as</p>
+<p><span class="math display">\[ \sigma^2 = \frac{ \sum (x_{i} -
+\bar{x})^2}{n} \]</span></p>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1" tabindex="-1"></a>a <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>)</span>
+<span id="cb192-2"><a href="#cb192-2" tabindex="-1"></a><span class="fu">var</span>(a)</span></code></pre></div>
+<pre><code>## [1] 2.5</code></pre>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="#cb194-1" tabindex="-1"></a><span class="fu">sd</span>(a)<span class="sc">==</span><span class="fu">sqrt</span>(<span class="fu">var</span>(a))</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<hr />
+<div id="naming-conventions" class="section level4">
+<h4>9. Naming conventions</h4>
+<p>Variable names should be short and speficic. Examples of often used
+styles:</p>
+<p><strong>Camel caps</strong></p>
+<pre><code>myHeightCM = 188</code></pre>
+<p><strong>Underscore</strong></p>
+<pre><code>my_height_cm = 188</code></pre>
+<p><strong>Dot separated</strong></p>
+<pre><code>my.height.cm = 188</code></pre>
+<hr />
+</div>
+</div>
+<div id="style-guides" class="section level3">
+<h3>10. Style guides</h3>
+<ul>
+<li><a href="http://4dpiecharts.com/r-code-style-guide/" class="uri">http://4dpiecharts.com/r-code-style-guide/</a></li>
+<li><a href="http://google-styleguide.googlecode.com/svn/trunk/google-r-style.html" class="uri">http://google-styleguide.googlecode.com/svn/trunk/google-r-style.html</a></li>
+<li><a href="http://wiki.fhcrc.org/bioc/Coding_Standards" class="uri">http://wiki.fhcrc.org/bioc/Coding_Standards</a></li>
+</ul>
+<hr />
+</div>
+<div id="references" class="section level3">
+<h3>11. References</h3>
+<p><a href="https://cognitiveclass.ai/courses/r-101">A free R course at
+Cognitive Class AI (IBM)</a></p>
+<p><a href="https://www.statlearning.com/">More advanced: my favorite
+book on Statistical Learning with R (free pdf ; Labs in R with
+Introduction to R in the 1st chapter)</a></p>
+<p><a href="https://www.dataschool.io/15-hours-of-expert-machine-learning-videos/">Videos
+and slides of an excellent course accompanying Introduction to
+Statistical Learning (1st Ed) by Hastie and Tibshirani</a></p>
+<p><a href="https://www.edx.org/course/statistical-learning">Free course
+at edX of of the 2nd Ed of Introduction to Statistical Learning (2nd Ed)
+by Hastie and Tibshirani</a></p>
+<p><a href="https://github.com/rstudio/Intro/tree/master/slides">Slides
+of the course Introduction to Data Science with R by Garrett Grolemund
+(RStudio)</a></p>
+<p><a href="https://www.coursera.org/specialization/jhudatascience/1?utm_medium=listingPage">Coursera
+Data Science Specialization</a></p>
+<p><a href="http://datasciencespecialization.github.io/">Data Science
+Specialization Community Site</a></p>
+<p><a href="http://www.oreilly.com/data/">O’Reilly Data</a></p>
+<p><a href="http://tryr.codeschool.com/">Try R at Code School</a></p>
+<hr />
+</div>
+<div id="sir-model" class="section level3">
+<h3>SIR model</h3>
+<p>The basic model to study infectious disease dynamics is the SIR
+model.<br />
+The population is divided into 3 groups:</p>
+<ul>
+<li>S : susceptible</li>
+<li>I : infectious<br />
+</li>
+<li>R : removed</li>
+</ul>
+<p>[Note that S, I and R are numbers of people, not fractions]</p>
+<p>Differential equations: <span class="math display">\[
+\begin{align}
+\frac{dS}{dt} &amp;= −b\cdot c\cdot \frac{I}{N} \cdot S \\
+\frac{dI}{dt} &amp;= b\cdot c\cdot \frac{I}{N} \cdot S - \frac{I}{d} \\
+\frac{dR}{dt} &amp;= \frac{I}{d}
+\end{align}
+\]</span> with<br />
+<span class="math inline">\(N=S+I+R\)</span></p>
+<p>and<br />
+<span class="math inline">\(b\)</span>: transmission probability per
+contact<br />
+<span class="math inline">\(c\)</span>: contact rate (the number of
+contacts per unit time)<br />
+<span class="math inline">\(d\)</span>: duration of the infectious
+period</p>
+<p>An epidemic will develop if <span class="math inline">\(\frac{dI}{dt}
+&gt; 0\)</span> i.e. if <span class="math inline">\(b \cdot c \cdot d
+&gt;1\)</span> (provided that <span class="math inline">\(I&gt;0\)</span> and <span class="math inline">\(\frac{S}{N} = 1\)</span>)</p>
+<p>The so called <span class="math inline">\(R_0 = b \cdot c \cdot
+d\)</span> is the number of secondary infections resulting from a single
+infectious person in a totally susceptible population (i.e when <span class="math inline">\(S = N−1\)</span> en <span class="math inline">\(I
+= 1\)</span>).</p>
+<p>The epidemic will stop spreading when <span class="math inline">\(R_t
+= b \cdot c \cdot d \cdot \frac{S_{t-1}}{N_{t-1}} &lt; 1\)</span>
+i.e. when <span class="math inline">\(\frac{S_{t-1}}{N_{t-1}} &lt;
+\frac{1}{b \cdot c \cdot d} = \frac{1}{R_0}\)</span> or equivalently
+when <span class="math inline">\(\frac{I_{t-1}+R_{t-1}}{N_{t-1}} &gt;
+\frac{R_0-1}{R_0}\)</span> which shows that a higher fraction of the
+population needs to be immune (e.g. vaccinated) when the <span class="math inline">\(R_0\)</span> is higher.</p>
+<p>An epidemic will not (further) develop if <span class="math inline">\(b\)</span> (e.g. washing hands frequently, keeping
+distance, face masks) is reduced and/or <span class="math inline">\(c\)</span> (contact rate) is reduced.</p>
+<p>Note that the effect of reducing e.g. the contact rate <span class="math inline">\(c\)</span> could result in the development of
+strains (due to selection pressure and evolution) that are more
+contagious (i.e. increased <span class="math inline">\(b\)</span>) or
+that cause an increase in <span class="math inline">\(d\)</span>.<br />
+In short: a new virus strain could have a higher <span class="math inline">\(b\)</span> and/or <span class="math inline">\(d\)</span> to compensate for the decreased contact
+rate <span class="math inline">\(c\)</span> ; a longer duration of the
+infectious period <span class="math inline">\(d\)</span> usually means
+less virulent / deadly.</p>
+<hr />
+</div>
+<div id="sir-model-in-rstudio" class="section level3">
+<h3>SIR model in RStudio</h3>
+<ol style="list-style-type: decimal">
+<li>Open RStudio</li>
+<li>Install the <strong><code>deSolve</code></strong> R package</li>
+<li>Open the file <a href="./R/SIR_model.R">SIR_model.R</a></li>
+<li>Run the code</li>
+<li>Experiment with parameters to reduce or increase the <span class="math inline">\(R_0\)</span></li>
+<li>(if time allows) Rewrite the equations and modify the code to<br />
+express <code>s</code>, <code>i</code> and <code>r</code> as fractions
+i.e. <span class="math inline">\(\text s = \frac S N\)</span> ; <span class="math inline">\(\text i = \frac I N\)</span> ; <span class="math inline">\(\text r = \frac R N\)</span></li>
+</ol>
+<hr />
+</div>
+<div id="background-on-differential-equations" class="section level3">
+<h3>Background on differential equations</h3>
+<p><strong>What is a differential equation?</strong></p>
+<p>Definition:</p>
+<p><strong><em>an equation that defines the relationship between a
+function and its derivatives</em></strong></p>
+<p>Which is kind of abstract ….</p>
+<p>We will limit ourselves to first derivatives and use time as the
+independent variable:</p>
+<p><span class="math display">\[\frac {dy} {dt} = k \cdot y\]</span></p>
+<p>with <span class="math inline">\(y\)</span> we actually mean <span class="math inline">\(y(t)\)</span> i.e. <span class="math inline">\(y\)</span> as a function of time ; we use <span class="math inline">\(y\)</span> as a short notation; so in fact:</p>
+<p><span class="math display">\[\frac {dy(t)} {dt} = k \cdot
+y(t)\]</span></p>
+<p>What does this mean?</p>
+<p>At any moment in time the first derivative of <span class="math inline">\(y\)</span> versus time (i.e. <em>the rate of
+change in</em> <span class="math inline">\(y\)</span>) equals a constant
+<span class="math inline">\(k\)</span> times the value of <span class="math inline">\(y\)</span> at that moment.</p>
+<p>We are looking for a function <span class="math inline">\(y(t)\)</span> that satisfies this condition
+(i.e. this differential equation).</p>
+<hr />
+</div>
+<div id="flowfield-of-frac-dyt-dt-k-cdot-yt" class="section level3">
+<h3>Flowfield of <span class="math display">\[\frac {dy(t)} {dt} = k
+\cdot y(t)\]</span></h3>
+<p>Before trying to find a solution to the differential equation, we can
+get an impression about the<br />
+time behavior by looking at the ‘flow field’ i.e. the derivative (slope
+of the tangent) of the<br />
+(unknown) function; in this case for <span class="math display">\[\frac
+{dy(t)}{dt} = - y(t)\]</span></p>
+<pre><code>## -------------------------------------------------------------------------------
+## phaseR: Phase plane analysis of one- and two-dimensional autonomous ODE systems
+## -------------------------------------------------------------------------------
+## 
+## v.2.1: For an overview of the package&#39;s functionality enter: ?phaseR
+## 
+## For news on the latest updates enter: news(package = &quot;phaseR&quot;)</code></pre>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAASFBMVEUAAAAAADoAAGYAOpAAZrY6AAA6ADo6AGY6Ojo6kNtmAABmtv+QOgCQ2/+2ZgC2//++vr7bkDrb////tmb/25D//7b//9v///8v+EO7AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAIVklEQVR4nO2di1bbSgxFwy3c3lJI7QbI///pDXZeBo2ONNbYgpy9VtfwsAbNrnMyJg82e6KyWbuB7FAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFATwCXp72gz886dRO/lwCeo3v8YPdqcPPk33ZWgh6O3prKX/8Xf2dKvSRNDr4+/Th7vCjey2BfEMQvSb4ylUziDPdGvSRtDhRjYmXOH8oSDndJ0yqN80DPWFQqMKFASoFNQb7sW6Y0udOIzfNAzB9UKjKjFnkLD/6rqhw/e2hn/24VzYoH4tQeJ0XTe05B6qCy317nW3zSDtNqIM1YWWeqlR84oQ/eFGNGyF5meQOUqC64VGVXwbxbvnw1bofm8RVJEhH8OjQX1bQeOlxtvTYZtoOoNShc8SGXS6WN3++GsRlC18ljqDDmzvjYLwsPx+UWpUwZdBRy2HSzJ7SCfbLwqNqnjvxcYb2duTI6SHDmeEbGR9a0Gu6W4vpN3T3VpIu6drmbXV9VKjCi1vYpaQNWdtVL3QqHlFAdSFtJKuwfX+dacI6SXS+cuH9Lx0dtRLjZpXNJtyBmWJIqFR84oCmExXuCcWB/sJMLdeaNS8ovlch/SYkN35Vw7KMObopKJNvX/dbc+gzjg4Dp1bLzVqXtF8ajeK06HptlFqVGHtkMaxGlwvNGpeUT3y024q7obwsmfXHzs2L816oHc6W8iWY7VNvX/dK4f0gunMkDbWS40qLB3S5yTxpmtQvdSoeUUBKFfzkwHs/i6FwfX+da90Na9+s+X1v3vdK17NWxK4Qb3UqHlFs4kJ6aZZLTWqsFJId/t5IV1dLzVqXlEAk41id9zM1Q/h9f51r7VRXH6HmFHQdEwSRUKjGstn0DDOyKB59VKj5hVh4MuhxF+5av1a7tBD66VGNXzP7sAvhzp/1BW2ud34jdOwB0NwfVtB3hez5ErnBULa+3KopllbXS80qtHwDNLStSZrQ+rd63ZmkOvlUPaLJ1PWxtRLjWr47sU8L4cSN7b2oU39DEGHtd+7ZCFBjaOkul5oVOPqwPen0RduOWa+e0ibHTleipArq+V1K3w8sNf2yeVZ5MfFzCFry9qQ+lPH5qVdf7IbXqsyvNagkm8c0sM91GimtAv0CVomUZYL6dfHu2drkWG6/eXUduSLeNMIrZcaNa8oAPwEKsOyTdu+2nqpUfOKAKdtovILD/mX9vZlyzeO0HqpUQXXGVR8iYY0Xa50DghpmyGw2775h312m9/q9+0P+xyHyv1edb173TmeozgdHFtDf73UqHlF8/mYQWnCZ6EM8k23dtooEZRDULJ0TpdB1Vnr3js76qVGzSsKICqk6wot9VKj5hXNpyqkl0jnLx7SC2a11KhGrpBezlACQRVZ212HbJt6oVHziiKYF9JN0/krhvSC6ZwypJtGSXW91KhCEkFLpPOagqSHfboxJTsxOj8O14eKQ1S9e92Nn0ieKZ6zZRBYz3Tw+6irlxo1ryiCm/+Vq2M6z7bPEjMx9e5159goLh5BOQRlNpRAEIjV6eCP5cp6oVHziiKQft2RLKuFRjUaX4vtC/u183A6Rhsi693rXjuDFgyfbBmEYsN8TGy91Kh5RfOZ7oPGcTr4FYTWC42aVxTBt34asAHPy6G0yDSma3x9Y0Gel0MdHRWH5dO5fUj7Xw5VHpZP5wVC2vlyKDUQHLEcWi81qsIzCODMIMfLoboxF8VB/aZhqC9sK8j516Fu7wzyTefOEM+mprZealRltScv+J3E1EuNalQKmv9nI1a+jeV4XOz2Qto3XeITKIWgzBGU4WI1NzkuVhOT4lIjMxkuVlPDMwiQ4GI1N6tdrH4Z2ghyYpjc8vOXmyasKm5yCgr4+RSUZpqwqrjJKSjg51NQmmnCquImp6CAn/99BX0HKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEKCFoN1mc3lf2Mkn4iHjY0nSGzS+/PwjFciHFKYZnm9xfhSvNE2ZBoJ2hxZ2pzYmn8iHvPxbaPn18fwAtzzN5BB5mrenQ1V/8laaRiFe0PgA9fb+8yfyIcXH+XeXp9nI00wOKUzz8vD+YPDxGYOlaTTiBU1amnwiH7Lv5YZ3m1/nNcvTTA4pTTMeOJ41hWlUGggaTvVj45NP5EP22/82hXfSvwgSp5kcokxz+J7WjU68oPF/6/h/NvlEPuT18f2R/q20tPNS5GkmhyjTnJ9rUZ6mzPqCjl+S/ls9grRprjN6fUHum9j4pQfhbYZdN7HiNJfn6uS4iblDevySdCeNQnr/WdDnafpLMOUIae/d/Ni1fhMr3z9/cPh5mv7qHbBz3M27N4pDw3pIl3d4V/di4jQvD9dfSbFRHP66y3sT4/u79+LmfnLIdrOR3+h8WL02zeQQcZp+fD7Z3bM+TRlerAIoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBgC8gaKf/gfLG5Bd09b5Xa0BBgPSCXh6U93NagPSCeAYhKAhAQQAKAlAQgIIAr4+FV6gsQ35B+y33QZmhIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIA/wNxIh+DmbgbHQAAAABJRU5ErkJggg==" /><!-- --></p>
+<hr />
+</div>
+<div id="solution-of-frac-dytdt-k-cdot-yt" class="section level3">
+<h3>Solution of <span class="math inline">\(\frac {dy(t)}{dt} = k \cdot
+y(t)\)</span></h3>
+<p>In this case the differential equation <span class="math inline">\(\frac{dy(t)}{dt} = k \cdot y(t)\)</span> has an
+analytic solution.</p>
+<p>From high school we may remember that the <span class="math inline">\(\frac{d}{dt}e^t = e^t\)</span> and that <span class="math inline">\(\frac{d}{dt}e^{k \cdot t} = k \cdot e^{k \cdot
+t}\)</span></p>
+<p>Therefore <span class="math inline">\(y(t) = e^{k \cdot t}\)</span>
+satisfies our differential equation</p>
+<p>In fact any function <span class="math inline">\(y(t) = y(0) \cdot
+e^{k \cdot t}\)</span> is a solution with <span class="math inline">\(y(0)\)</span> the value of <span class="math inline">\(y\)</span> at <span class="math inline">\(t=0\)</span> i.e. the initial condition.</p>
+<p>See also <a href="https://personal.math.ubc.ca/~keshet/OpenBook.pdf" class="uri">https://personal.math.ubc.ca/~keshet/OpenBook.pdf</a> (book
+by Edelstein-Keshet)<br />
+chapter 11: <em>Differential equations for exponential growth and
+decay</em> for theory and background.</p>
+<p>[<a href="https://epubs.siam.org/doi/book/10.1137/1.9780898719147" class="uri">https://epubs.siam.org/doi/book/10.1137/1.9780898719147</a>
+is slightly more advanced and my favorite book on this subject ; also by
+Edelstein-Keshet]</p>
+<hr />
+</div>
+<div id="simulation" class="section level3">
+<h3>Simulation</h3>
+<p>Unfortunately ( ? :-) many differential equations cannot be solved
+analytically….</p>
+<p>In that case we can integrate a system of differential equations
+numerically i.e. simulate the time behavior using numerical methods.</p>
+<p>This comes down to:</p>
+<ol style="list-style-type: decimal">
+<li>start with an initial value at time <span class="math inline">\(t=0\)</span>: <span class="math inline">\(y(0) =
+1\)</span></li>
+<li>calculate <span class="math inline">\(\frac{dy(t)}{dt} = k \cdot
+y(t)\)</span></li>
+<li>with e.g. <span class="math inline">\(k = -0.6\)</span>: <span class="math inline">\(\frac{dy(0)}{dt} = -0.6 * 1 = -0.6\)</span></li>
+<li>calculate <span class="math inline">\(y\)</span> at time <span class="math inline">\(t+h\)</span> (where <span class="math inline">\(h\)</span> is a small time step for instance <span class="math inline">\(0.2\)</span>): <span class="math inline">\(y(t+h)
+= y(0)+ h \cdot \frac{dy(0)}{dt} = 1 + 0.2 \cdot -0.6 =
+0.88\)</span></li>
+<li>next, calculate <span class="math inline">\(y(t+2\cdot
+h)\)</span>:<br />
+<span class="math inline">\(y(t+2\cdot h) = y(t+h) + h \cdot
+\frac{dy(t+h)}{dt} = 0.88 + 0.2 \cdot -0.6 \cdot 0.88 =
+0.7744\)</span></li>
+</ol>
+<p>etcetera …..</p>
+<p>Of course, it is more convenient to write a couple of R
+functions:</p>
+<div class="sourceCode" id="cb200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb200-1"><a href="#cb200-1" tabindex="-1"></a>dy <span class="ot">=</span> <span class="cf">function</span>(y,k){</span>
+<span id="cb200-2"><a href="#cb200-2" tabindex="-1"></a>  k<span class="sc">*</span>y</span>
+<span id="cb200-3"><a href="#cb200-3" tabindex="-1"></a>}</span>
+<span id="cb200-4"><a href="#cb200-4" tabindex="-1"></a>euler <span class="ot">=</span> <span class="cf">function</span>(f,y0,k,times){</span>
+<span id="cb200-5"><a href="#cb200-5" tabindex="-1"></a>  n <span class="ot">=</span> <span class="fu">length</span>(times)</span>
+<span id="cb200-6"><a href="#cb200-6" tabindex="-1"></a>  h <span class="ot">=</span> times[<span class="dv">2</span>]<span class="sc">-</span>times[<span class="dv">1</span>]</span>
+<span id="cb200-7"><a href="#cb200-7" tabindex="-1"></a>  y <span class="ot">=</span> <span class="dv">0</span><span class="sc">*</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
+<span id="cb200-8"><a href="#cb200-8" tabindex="-1"></a>  t <span class="ot">=</span> <span class="dv">0</span> </span>
+<span id="cb200-9"><a href="#cb200-9" tabindex="-1"></a>  y[<span class="dv">1</span>]<span class="ot">=</span>y0</span>
+<span id="cb200-10"><a href="#cb200-10" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n)</span>
+<span id="cb200-11"><a href="#cb200-11" tabindex="-1"></a>    y[i] <span class="ot">=</span> y[i<span class="dv">-1</span>]<span class="sc">+</span>h<span class="sc">*</span><span class="fu">f</span>(y[i<span class="dv">-1</span>],k) </span>
+<span id="cb200-12"><a href="#cb200-12" tabindex="-1"></a>  y</span>
+<span id="cb200-13"><a href="#cb200-13" tabindex="-1"></a>}</span>
+<span id="cb200-14"><a href="#cb200-14" tabindex="-1"></a>t <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">3</span>,<span class="fl">0.2</span>)</span>
+<span id="cb200-15"><a href="#cb200-15" tabindex="-1"></a>y0<span class="ot">=</span><span class="dv">1</span> ; k <span class="ot">=</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb200-16"><a href="#cb200-16" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">euler</span>(dy,y0,k,t)</span>
+<span id="cb200-17"><a href="#cb200-17" tabindex="-1"></a><span class="fu">plot</span>(t,y,<span class="at">type=</span><span class="st">&quot;l&quot;</span>,<span class="at">col=</span><span class="st">&quot;red&quot;</span>,<span class="at">lwd=</span><span class="dv">1</span>, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),<span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">3</span>))</span>
+<span id="cb200-18"><a href="#cb200-18" tabindex="-1"></a><span class="fu">lines</span>(t,y0<span class="sc">*</span><span class="fu">exp</span>(k<span class="sc">*</span>t),<span class="at">col=</span><span class="st">&quot;blue&quot;</span>,<span class="at">lwd=</span><span class="dv">2</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<hr />
+</div>
+<div id="examples-of-processes-described-by-simple-differential-equations" class="section level3">
+<h3>Examples of processes described by simple differential
+equations</h3>
+<p>Pharmacokinetics: removal of a substance from the circulation by the
+kidney (glomerular filtration).<br />
+In fact, this is slightly more complicated (two coupled 1st order diff
+eqs):</p>
+<p><span class="math inline">\(\frac{dc1}{dt} = -k10*c1 +
+k21*c2\)</span><br />
+<span class="math inline">\(\frac{dc2}{dt} = k12*c1\)</span></p>
+<div class="float">
+<img src="data:image/png;base64,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" alt="two-compartment system" />
+<div class="figcaption">two-compartment system</div>
+</div>
+<div class="float">
+<img src="data:image/png;base64,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" alt="hydraulic analogue" />
+<div class="figcaption">hydraulic analogue</div>
+</div>
+<div class="float">
+<img src="data:image/png;base64,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" alt="electrical analog" />
+<div class="figcaption">electrical analog</div>
+</div>
+<p>Note that the differential equations for these 3 systems are
+identical. Also, the differential equations can be solved analytically
+using standard methods.</p>
+<hr />
+</div>
+<div id="significance-of-a-compartment-with-a-fixed-rate-of-removal" class="section level3">
+<h3>Significance of a compartment with a fixed rate of removal</h3>
+<p>In a standard S(E)IR model, disease progression is defined as:</p>
+<p><span class="math display">\[\frac{dI}{dt} =
+\frac{-I}{d}\]</span></p>
+<p>with d the duration of the infectious period (i.e. a removal rate of
+<span class="math inline">\(\frac 1 d\)</span>)</p>
+<p>This means that although the average duration of disease equals <span class="math inline">\(d\)</span>, <span class="math inline">\(63
+\%\)</span> <span class="math inline">\(\left (\frac 1 e
+\right)\)</span> of the people in disease stage <span class="math inline">\(I\)</span> would have moved out in a time period
+shorter than <span class="math inline">\(d\)</span>. The residence time
+is exponentially distributed (cf a Poisson process with a fixed
+probability of an event per unit time). This is very different from
+e.g. a normal distribution. Also, infectious diseases are usually
+modeled as Markov processes, which means that the change in state only
+depends on the current state (i.e. there is no memory).</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

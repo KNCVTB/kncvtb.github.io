@@ -1,2 +1,2 @@
-# kncvtb.github.io
-EndTB model training
+# github.io
+Course Infectious Disease Modelling with R
