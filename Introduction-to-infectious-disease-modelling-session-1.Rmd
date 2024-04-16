@@ -816,8 +816,9 @@ Before trying to find a solution to the differential equation, we can get an imp
 time behavior by looking at the 'flow field' i.e. the derivative (slope of the tangent) of the\
 (unknown) function; in this case for $$\frac {dy(t)}{dt} = - y(t)$$
 
-```{r echo=F}
-library(phaseR)
+```{r echo=TRUE, out.width="100%", out.height="100%"}
+
+require(phaseR)
 
 dy = function(t,y,parameters){
   k = parameters[1]
@@ -825,9 +826,12 @@ dy = function(t,y,parameters){
 }
 expdecay  <- flowField(dy,xlim = c(0,2), ylim = c(0, 2),
                                  parameters = -1,
-                                 points     = 21,
+                                 points     = 11,
+                                 col = "blue",
                                  system     = "one.dim",
                                  add        = FALSE)
+
+
 ```
 
 ------------------------------------------------------------------------
@@ -892,6 +896,8 @@ lines(t,y0*exp(k*t),col="blue",lwd=2)
 ------------------------------------------------------------------------
 
 ### Examples of processes described by simple differential equations
+
+See also: [flowfield-Lorenz-2C-etc.R](./R/flowfield-Lorenz-2C-etc.R)
 
 Pharmacokinetics: removal of a substance from the circulation by the kidney (glomerular filtration).\
 In fact, this is slightly more complicated (two coupled 1st order diff eqs):
